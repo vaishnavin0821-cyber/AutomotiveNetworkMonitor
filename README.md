@@ -4,13 +4,12 @@ A lightweight client-server event update system in C over TCP/IP. One server (`N
 
 ## Components
 
-
 | Executable | Role |
-NetworkEventManager -> Server — generates events, broadcasts to all connected clients 
-GatewayECU -> Client
-DiagnosticECU -> Client
-DataLoggerECU -> Client
-
+|---|---|
+| `NetworkEventManager` | Server — generates events, broadcasts to all connected clients |
+| `GatewayECU` | Client |
+| `DiagnosticECU` | Client |
+| `DataLoggerECU` | Client |
 
 ## What's implemented
 
@@ -24,9 +23,6 @@ DataLoggerECU -> Client
 - **Server-driven event generation** — the server generates a new event automatically on a timer, independent of client connections, so events keep flowing even after all clients are already connected.
 - **Manual demo commands** — the server can also be told to send a specific event type, or resend the last event, for live demonstration of duplicate handling.
 
-## Design
-
-See `design_and_test_scenarios.md` for the architecture diagram, TCP/UDP sequence flows, and the full test scenario table.
 
 ### Key design decisions
 
