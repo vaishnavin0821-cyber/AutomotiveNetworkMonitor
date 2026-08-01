@@ -1,0 +1,10 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="DataLoggerECU/DataLoggerECU.vcxproj" Id="4414806e-7055-41ce-8f70-d0f2b2fd7823" />
+  <Project Path="DiagnosticECU/DiagnosticECU.vcxproj" Id="5210dbe6-474b-4587-b6bb-c19e7c7c8dfd" />
+  <Project Path="GatewayECU/GatewayECU.vcxproj" Id="19c4843c-39f1-4bff-ac2a-bc30ab170aa1" />
+  <Project Path="NetworkEventManager/NetworkEventManager.vcxproj" Id="484199ba-81bf-407e-b5ad-51dd6c1c3296" />
+</Solution>
