@@ -10,7 +10,7 @@
 
 #pragma comment(lib, "Ws2_32.lib")
 
-/* ---------- State ---------- */
+/* State */
 static SOCKET serverSocket = INVALID_SOCKET;
 static SOCKET clientSocket = INVALID_SOCKET;
 static SOCKET clientSockets[MAX_CLIENTS];
@@ -31,13 +31,11 @@ static uint32_t nextEventID = 101;
 static EventPacket lastEvent;
 static EventPacket demoEvents[5];
 
-/* ---------- Internal helpers ---------- */
+/*  Internal helpers  */
 static int IsDuplicateEvent(uint32_t eventID);
 static void AddProcessedEvent(uint32_t eventID);
 
-/* =====================================================
-   Server
-   ===================================================== */
+//server 
 
 int NetworkManager_Initialize(void)
 {
@@ -66,6 +64,12 @@ int NetworkManager_Initialize(void)
     }
 
     printf("Server socket created successfully.\n");
+
+    if(transportMode == TRANSPORT_UDP)
+    {
+        DWORD timeout = 3000;
+        setsockopt(serverSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout));
+    }
 
     memset(&serverAddress, 0, sizeof(serverAddress));
     serverAddress.sin_family = AF_INET;
@@ -102,7 +106,7 @@ int NetworkManager_Initialize(void)
 
 /* Accepts/registers exactly one client. Does NOT generate an event —
    event generation is fully decoupled from connection handling and is
-   driven by the timer loop in main.c, matching the assignment spec. */
+   driven by the timer loop in main.c,  */
 int NetworkManager_WaitForECU(void)
 {
     if (transportMode == TRANSPORT_TCP)
@@ -225,9 +229,7 @@ int NetworkManager_PollForECU(void)
     return 0;
 }
 
-/* =====================================================
-   Client
-   ===================================================== */
+//client
 
 int NetworkManager_InitializeClient(void)
 {
@@ -415,9 +417,7 @@ void NetworkManager_SetECUName(const char* ecuName)
     strcpy_s(localECUName, sizeof(localECUName), ecuName);
 }
 
-/* =====================================================
-   Shared
-   ===================================================== */
+//shared
 
 void NetworkManager_SelectTransportMode(void)
 {
@@ -469,9 +469,7 @@ const char* NetworkManager_GetSeverityName(Severity severity)
     }
 }
 
-/* =====================================================
-   Duplicate detection
-   ===================================================== */
+//Duplicate detection
 
 static int IsDuplicateEvent(uint32_t eventID)
 {
@@ -485,22 +483,25 @@ static int IsDuplicateEvent(uint32_t eventID)
     return 0;
 }
 
+static int nextSlotToOverwrite = 0;
+
 static void AddProcessedEvent(uint32_t eventID)
 {
+    processedEvents[nextSlotToOverwrite] = eventID;
+    nextSlotToOverwrite = (nextSlotToOverwrite + 1) % MAX_EVENT_HISTORY;
+
     if (processedEventCount < MAX_EVENT_HISTORY)
     {
-        processedEvents[processedEventCount] = eventID;
         processedEventCount++;
     }
 }
 
-/* =====================================================
-   Event generation
-   ===================================================== */
+//event generation
 
    /* Generates a new, unique event (used by the periodic timer in main.c).
       Also remembers it as lastEvent so it can be replayed on demand via
       NetworkManager_ResendLastEvent() to demonstrate duplicate handling. */
+
 void NetworkManager_CreateEvent(EventPacket* event)
 {
     event->eventID = nextEventID++;
@@ -529,11 +530,10 @@ void NetworkManager_BroadcastEvent(EventPacket* event)
             if (bytesSent == SOCKET_ERROR)
             {
                 printf("Failed to send UDP event. Error = %d\n", WSAGetLastError());
+                continue;
             }
-            else
-            {
-                printf("UDP event sent successfully to client %d.\n", i);
-            }
+
+            printf("UDP event sent successfully to client %d.\n", i);
 
             AckPacket ack;
             struct sockaddr_in clientAddr;
